@@ -18,7 +18,6 @@ The classification of the message is based on the following rules:
 """
 
 classification = {
-    "rules": [get_triage_instructions().triage_rules.keys()],
     "description": classification_description
 }
 
