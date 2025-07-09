@@ -1,5 +1,6 @@
 from langchain_core.tools import tool
 from datetime import datetime
+from memory_store import store
 
 @tool
 def manage_memory(memory_id: str, action: str, data: str):
@@ -18,21 +19,46 @@ def manage_memory(memory_id: str, action: str, data: str):
 
 def create_memory(memory_id: str, data: str):
     """
-    Create a new memory for the customer support.
+    Create a new memory for the customer support using InMemoryStore.
     """
-    id = "mem_" + str(hash(data))[:8]
-    memory = {
-        "id": id,
+    # Create namespace for customer support memories
+    namespace = ("customer_support", "memories")
+    
+    # Create memory data structure
+    memory_data = {
+        "id": memory_id,
         "data": data,
         "created_at": datetime.now().isoformat(),
         "updated_at": datetime.now().isoformat(),
     }
-    return f"Created memory {id} at {memory['created_at']} "
+    
+    # Store in InMemoryStore
+    store.put(namespace, memory_id, memory_data)
+    
+    return f"Created memory {memory_id} at {memory_data['created_at']} using InMemoryStore"
 
 @tool
 def search_memory(query: str):
     """
-    Search the memory of the customer support.
+    Search the memory of the customer support using InMemoryStore.
+    
+    Example search result:
+    [Item(namespace=['customer_support', 'memories'], key='email_thread_login_issues_test@test.com', 
+          value={'id': 'email_thread_login_issues_test@test.com', 
+                 'data': 'Responded to the customer regarding previous login issue inquiry, awaiting further instructions or questions.', 
+                 'created_at': '2025-07-09T22:50:08.879836', 
+                 'updated_at': '2025-07-09T22:50:08.879846'}, 
+          created_at='2025-07-09T20:50:09.212670+00:00', 
+          updated_at='2025-07-09T20:50:09.212692+00:00', 
+          score=0.48549467836580756)]
     """
-    print(f"Searching memory for {query}")
-    return []
+    # Create namespace for customer support memories
+    namespace = ("customer_support", "memories")
+    
+    # Search in InMemoryStore
+    results = store.search(namespace, query=query)
+    
+    print(f"Searching memory for '{query}' - found {len(results)} results")
+
+    
+    return results
